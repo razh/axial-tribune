@@ -1,0 +1,17 @@
+{
+  "name": "axial-tribune",
+  "version": "0.0.0",
+  "homepage": "https://github.com/razh/axial-tribune",
+  "authors": [
+    "Raymond Zhou"
+  ],
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}
