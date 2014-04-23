@@ -38,4 +38,14 @@
     renderer.setSize( window.innerWidth, window.innerHeight );
   });
 
+
+  // Websocket.
+  var host = window.document.location.host.replace( /:.*/, '' );
+  var socket = new WebSocket( 'ws://' + host + ':8080' );
+  socket.binaryType = 'arraybuffer';
+
+  socket.addEventListener( 'message', function( event ) {
+    var data = new Float32Array( event.data );
+    console.log( data.length );
+  });
 }) ();
