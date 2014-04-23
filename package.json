@@ -1,0 +1,20 @@
+{
+  "name": "axial-tribune",
+  "version": "0.0.0",
+  "description": "axial-tribune",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo 'No tests specified.'"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/razh/axial-tribune.git"
+  },
+  "author": "razh",
+  "private": true,
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/razh/axial-tribune/issues"
+  },
+  "homepage": "https://github.com/razh/axial-tribune"
+}
