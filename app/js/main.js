@@ -1,10 +1,39 @@
-/*globals THREE, requestAnimationFrame*/
+/*globals THREE, Promise, requestAnimationFrame*/
 (function() {
   'use strict';
 
   var container;
 
   var scene, camera, renderer;
+
+  var shaders = {};
+
+  function get( url ) {
+    return new Promise(function( resolve, reject ) {
+      var xhr = new XMLHttpRequest();
+      xhr.open( 'GET', url );
+
+      xhr.onload = function() {
+        if (xhr.status === 200 ) {
+          resolve( xhr.response );
+        } else {
+          reject( new Error( xhr.statusText ) );
+        }
+      };
+
+      xhr.onerror = function() {
+        reject( new Error( xhr.statusText ) );
+      };
+
+      xhr.send();
+    });
+  }
+
+  var shaderPromise = get( './app/shaders/particles.vert' )
+    .then(function( data ) {
+      console.log( data );
+    });
+
 
   function init() {
     container = document.createElement( 'div' );
