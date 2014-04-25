@@ -29,10 +29,22 @@
     });
   }
 
-  var shaderPromise = get( './app/shaders/particles.vert' )
-    .then(function( data ) {
-      console.log( data );
-    });
+  var promises = [];
+  var directory = '/app/shaders/';
+
+  [
+    'particles.vert',
+    'particles.frag'
+  ].forEach(function( name ) {
+    var promise = get( directory + name )
+      .then(function( data ) {
+        console.log( name );
+        console.log( data );
+        shaders[ name ] = data;
+      });
+
+    promises.push( promise );
+  });
 
 
   function init() {
@@ -57,8 +69,10 @@
   function render() {
   }
 
-  init();
-  animate();
+  Promise.all( promises ).then(function() {
+    init();
+    animate();
+  });
 
   window.addEventListener( 'resize', function() {
     camera.aspect = window.innerWidth / window.innerHeight;
