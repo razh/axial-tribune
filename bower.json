@@ -16,6 +16,6 @@
   ],
   "dependencies": {
     "angular": "~1.2.16",
-    "threejs": "r66"
+    "threejs": "r67"
   }
 }

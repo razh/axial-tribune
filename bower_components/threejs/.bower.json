@@ -14,7 +14,6 @@
   "ignore": [
     "**/.*",
     "*.md",
-    "bower.json",
     "docs",
     "editor",
     "examples",
@@ -23,13 +22,14 @@
     "utils",
     "LICENSE"
   ],
-  "_release": "r66",
+  "_release": "r67",
   "_resolution": {
     "type": "tag",
-    "tag": "r66",
-    "commit": "a6c091cdd9409075d3f0dcb30912847f380a37b1"
+    "tag": "r67",
+    "commit": "16b5d6ec488e2996d62b074160996f5fc3436528"
   },
   "_source": "git://github.com/mrdoob/three.js.git",
-  "_target": "r66",
-  "_originalSource": "threejs"
+  "_target": "r67",
+  "_originalSource": "threejs",
+  "_direct": true
 }
