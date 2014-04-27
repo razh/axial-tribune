@@ -5,6 +5,9 @@
   var container;
 
   var scene, camera, renderer;
+  var geometry, mesh, material;
+
+  var data, texture;
 
   var shaders = {};
 
@@ -29,21 +32,21 @@
     });
   }
 
-  var promises = [];
-  var directory = '/app/shaders/';
+  var shaderPromises = [];
+  var shaderDirectory = '/app/shaders/';
 
   [
     'particles.vert',
     'particles.frag'
-  ].forEach(function( name ) {
-    var promise = get( directory + name )
-      .then(function( data ) {
-        console.log( name );
-        console.log( data );
-        shaders[ name ] = data;
+  ].forEach(function( shaderName ) {
+    var promise = get( shaderDirectory + shaderName )
+      .then(function( shaderData ) {
+        console.log( shaderName );
+        console.log( shaderData );
+        shaders[ shaderName ] = shaderData;
       });
 
-    promises.push( promise );
+    shaderPromises.push( promise );
   });
 
 
@@ -58,7 +61,57 @@
     scene = new THREE.Scene();
 
     camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 1000 );
+    camera.position.z = 4;
     scene.add( camera );
+
+    // Create RGB texture.
+    var width = 1024,
+        height = 1024;
+
+    data = new Float32Array( width * height * 3 );
+
+    texture = new THREE.DataTexture( data, width, height, THREE.RGBFormat, THREE.FloatType );
+    texture.minFilter = THREE.NearestFilter;
+    texture.minFilter = THREE.NearestFilter;
+    texture.needspdate = true;
+
+    material = new THREE.ShaderMaterial({
+      uniforms: {
+        width: { type: 'f', value: width },
+        height: { type: 'f', value: height },
+
+        scale: { type: 'f', value: 128 },
+
+        pointColor: { type: 'v4', value: new THREE.Vector4( 0.5, 0.5, 0.5, 0.5 ) },
+        pointSize: { type: 'f', value: 2 }
+      },
+
+      vertexShader: shaders[ 'particles.vert' ],
+      fragmentShader: shaders[ 'particles.frag' ],
+
+      blending: THREE.AdditiveBlending,
+      transparent: true,
+
+      // Avoid z-index artifacts.
+      depthWrite: false,
+      depthTest: false
+    });
+
+    // Create geometry.
+    geometry = new THREE.Geometry();
+
+    var vertex;
+    for ( var i = 0, il = width * height; i < il; i++ ) {
+      vertex = new THREE.Vector3();
+      // [0.0, 1.0] parameter along texture.
+      vertex.x = ( i % width ) / width;
+      vertex.y = Math.floor( i / width ) / height;
+      geometry.vertices.push( vertex );
+    }
+
+    // Create particle system.
+    mesh = new THREE.ParticleSystem( geometry, material );
+    scene.add( mesh );
   }
 
   function animate() {
@@ -67,9 +120,10 @@
   }
 
   function render() {
+    renderer.render( scene, camera );
   }
 
-  Promise.all( promises ).then(function() {
+  Promise.all( shaderPromises ).then(function() {
     init();
     animate();
   });
