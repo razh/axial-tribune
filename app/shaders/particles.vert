@@ -1,5 +1,5 @@
-uniform float scale;
 uniform float pointSize;
+uniform float scale;
 
 void main() {
   gl_PointSize = pointSize;

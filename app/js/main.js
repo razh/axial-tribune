@@ -52,6 +52,7 @@
 
   function init() {
     container = document.createElement( 'div' );
+    container.classList.add( 'webgl' );
     document.body.appendChild( container );
 
     renderer = new THREE.WebGLRenderer();
@@ -72,11 +73,12 @@
 
     texture = new THREE.DataTexture( data, width, height, THREE.RGBFormat, THREE.FloatType );
     texture.minFilter = THREE.NearestFilter;
-    texture.minFilter = THREE.NearestFilter;
-    texture.needspdate = true;
+    texture.magFilter = THREE.NearestFilter;
+    texture.needsUpdate = true;
 
     material = new THREE.ShaderMaterial({
       uniforms: {
+        // texture: { type: 't', value: texture },
         width: { type: 'f', value: width },
         height: { type: 'f', value: height },
 
@@ -136,13 +138,50 @@
   });
 
 
-  // Websocket.
-  var host = window.document.location.host.replace( /:.*/, '' );
-  var socket = new WebSocket( 'ws://' + host + ':8080' );
-  socket.binaryType = 'arraybuffer';
+  (function() {
+    // Websocket.
+    var host = window.document.location.host.replace( /:.*/, '' );
+    var socket = new WebSocket( 'ws://' + host + ':8080' );
+    socket.binaryType = 'arraybuffer';
 
-  socket.addEventListener( 'message', function( event ) {
-    var data = new Float32Array( event.data );
-    console.log( data.length );
-  });
+    var row = 0;
+    socket.addEventListener( 'message', function( event ) {
+      var data = new Float32Array( event.data );
+      draw( context, data, row++ );
+      console.log( data.length );
+    });
+
+    // Test canvas.
+    var canvas  = document.createElement( 'canvas' ),
+        context = canvas.getContext( '2d' );
+
+    document.body.appendChild( canvas );
+
+    canvas.width = 128;
+    canvas.height = 128;
+
+    function draw( ctx, message, row ) {
+      var width  = ctx.canvas.width,
+          height = ctx.canvas.height;
+
+      // Loop back.
+      row %= height;
+
+      var imageData = ctx.getImageData( 0, 0, width, height ),
+          data = imageData.data;
+
+      var index, value;
+      for ( var i = 0; i < width; i++ ) {
+        index = 4 * ( row * width + i );
+        value = Math.round( message[i] * 255 );
+
+        data[ index     ] = value;
+        data[ index + 1 ] = value;
+        data[ index + 2 ] = value;
+        data[ index + 3 ] = value;
+      }
+
+      ctx.putImageData( imageData, 0, 0 );
+    }
+  }) ();
 }) ();

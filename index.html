@@ -9,6 +9,19 @@
       margin: 0;
       overflow: hidden;
     }
+
+    canvas,
+    .webgl {
+      position: absolute;
+    }
+
+    .webgl {
+      z-index: 0;
+    }
+
+    canvas {
+      z-index: 1;
+    }
   </style>
 </head>
 <body>
