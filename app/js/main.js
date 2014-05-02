@@ -173,12 +173,12 @@
       var index, value;
       for ( var i = 0; i < width; i++ ) {
         index = 4 * ( row * width + i );
-        value = Math.round( message[i] * 255 );
+        value = 0.5 * ( message[i] + 1 ) * 255;
 
         data[ index     ] = value;
         data[ index + 1 ] = value;
         data[ index + 2 ] = value;
-        data[ index + 3 ] = value;
+        data[ index + 3 ] = 255;
       }
 
       ctx.putImageData( imageData, 0, 0 );
