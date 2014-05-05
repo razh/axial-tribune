@@ -4,7 +4,7 @@
 
   var container;
 
-  var scene, camera, renderer;
+  var scene, camera, controls, renderer;
   var geometry, mesh, material;
 
   var data, texture;
@@ -62,13 +62,21 @@
     scene = new THREE.Scene();
 
     camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 1000 );
-    camera.position.z = 4;
+    controls = new THREE.OrbitControls( camera, renderer.domElement );
+
+    var scale = 256;
+    var halfScale = 0.5 * scale;
+
+    var width = 128,
+        height = 128;
+
+    camera.position.set( halfScale, halfScale, -scale );
+    controls.target.set( halfScale, halfScale, 0 );
+    controls.update();
+
     scene.add( camera );
 
     // Create RGB texture.
-    var width = 1024,
-        height = 1024;
-
     data = new Float32Array( width * height * 3 );
 
     texture = new THREE.DataTexture( data, width, height, THREE.RGBFormat, THREE.FloatType );
@@ -82,7 +90,7 @@
         width: { type: 'f', value: width },
         height: { type: 'f', value: height },
 
-        scale: { type: 'f', value: 128 },
+        scale: { type: 'f', value: scale },
 
         pointColor: { type: 'v4', value: new THREE.Vector4( 0.5, 0.5, 0.5, 0.5 ) },
         pointSize: { type: 'f', value: 2 }
