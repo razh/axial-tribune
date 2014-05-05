@@ -7,7 +7,8 @@
   var scene, camera, controls, renderer;
   var geometry, mesh, material;
 
-  var data, texture;
+  var canvas, context;
+  var texture;
 
   var shaders = {};
 
@@ -76,17 +77,16 @@
 
     scene.add( camera );
 
-    // Create RGB texture.
-    data = new Float32Array( width * height * 3 );
-
-    texture = new THREE.DataTexture( data, width, height, THREE.RGBFormat, THREE.FloatType );
-    texture.minFilter = THREE.NearestFilter;
-    texture.magFilter = THREE.NearestFilter;
-    texture.needsUpdate = true;
+    canvas = document.createElement( 'canvas' );
+    context = canvas.getContext( '2d' );
+    canvas.width = 128;
+    canvas.height = 128;
+    document.body.appendChild( canvas );
+    texture = new THREE.Texture( canvas );
 
     material = new THREE.ShaderMaterial({
       uniforms: {
-        // texture: { type: 't', value: texture },
+        texture: { type: 't', value: texture },
         width: { type: 'f', value: width },
         height: { type: 'f', value: height },
 
@@ -154,19 +154,14 @@
 
     var row = 0;
     socket.addEventListener( 'message', function( event ) {
+      if ( !context ) {
+        return;
+      }
+
       var data = new Float32Array( event.data );
       draw( context, data, row++ );
       console.log( data.length );
     });
-
-    // Test canvas.
-    var canvas  = document.createElement( 'canvas' ),
-        context = canvas.getContext( '2d' );
-
-    document.body.appendChild( canvas );
-
-    canvas.width = 128;
-    canvas.height = 128;
 
     function draw( ctx, message, row ) {
       var width  = ctx.canvas.width,
@@ -190,6 +185,7 @@
       }
 
       ctx.putImageData( imageData, 0, 0 );
+      texture.needsUpdate = true;
     }
   }) ();
 }) ();
