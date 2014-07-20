@@ -119,8 +119,9 @@
       geometry.vertices.push( vertex );
     }
 
-    // Create particle system.
-    mesh = new THREE.ParticleSystem( geometry, material );
+    // Create point cloud.
+    mesh = new THREE.PointCloud( geometry, material );
+    mesh.frustumCulled = false;
     scene.add( mesh );
   }
 
