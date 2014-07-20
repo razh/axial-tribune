@@ -56,13 +56,13 @@
     container.classList.add( 'webgl' );
     document.body.appendChild( container );
 
-    renderer = new THREE.WebGLRenderer();
+    renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize( window.innerWidth, window.innerHeight );
     container.appendChild( renderer.domElement );
 
     scene = new THREE.Scene();
 
-    camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 1000 );
+    camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 1e4 );
     controls = new THREE.OrbitControls( camera, renderer.domElement );
 
     var scale = 256;
@@ -71,7 +71,7 @@
     var width = 128,
         height = 128;
 
-    camera.position.set( halfScale, halfScale, -scale );
+    camera.position.set( halfScale, halfScale, scale );
     controls.target.set( halfScale, halfScale, 0 );
     controls.update();
 
