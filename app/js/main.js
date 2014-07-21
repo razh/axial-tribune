@@ -5,7 +5,8 @@
   var container;
 
   var scene, camera, controls, renderer;
-  var geometry, mesh, material;
+  var textureGeometry, textureMesh, textureMaterial;
+  var pointGeometry, pointMesh, pointMaterial;
 
   var canvas, context;
   var texture;
@@ -84,7 +85,12 @@
     document.body.appendChild( canvas );
     texture = new THREE.Texture( canvas );
 
-    material = new THREE.ShaderMaterial({
+    /**
+     * Two update methods:
+     *   - Texture updates read by the vertex shader.
+     *   - Update vertices directly.
+     */
+    textureMaterial = new THREE.ShaderMaterial({
       uniforms: {
         texture: { type: 't', value: texture },
         width: { type: 'f', value: width },
@@ -107,22 +113,52 @@
       depthTest: false
     });
 
-    // Create geometry.
-    geometry = new THREE.Geometry();
+    // Create texture-based geometry.
+    textureGeometry = new THREE.Geometry();
 
     var vertex;
-    for ( var i = 0, il = width * height; i < il; i++ ) {
+    var i, il;
+    for ( i = 0, il = width * height; i < il; i++ ) {
       vertex = new THREE.Vector3();
       // [0.0, 1.0] parameter along texture.
       vertex.x = ( i % width ) / width;
       vertex.y = Math.floor( i / width ) / height;
-      geometry.vertices.push( vertex );
+      textureGeometry.vertices.push( vertex );
     }
 
     // Create point cloud.
-    mesh = new THREE.PointCloud( geometry, material );
-    mesh.frustumCulled = false;
-    scene.add( mesh );
+    textureMesh = new THREE.PointCloud( textureGeometry, textureMaterial );
+    textureMesh.frustumCulled = false;
+    scene.add( textureMesh );
+
+
+    // Create mesh with direct vertex update.
+    pointMaterial = new THREE.PointCloudMaterial({
+      blending: THREE.AdditiveBlending,
+      transparent: true,
+
+      color: new THREE.Color( 0.5, 0.5, 0.5 ),
+      opacity: 0.5,
+
+      size: 2,
+      sizeAttenuation: false
+    });
+
+    pointGeometry = new THREE.Geometry();
+
+    var halfWidth  = 0.5 * width,
+        halfHeight = 0.5 * height;
+
+    for ( i = 0, il = width * height; i <  il; i++ ) {
+      vertex = new THREE.Vector3();
+      vertex.x = i % width + halfWidth;
+      vertex.y = Math.floor( i / width ) + halfHeight;
+      pointGeometry.vertices.push( vertex );
+    }
+
+    pointMesh = new THREE.PointCloud( pointGeometry, pointMaterial );
+    pointMesh.sortParticles = true;
+    // scene.add( pointMesh );
   }
 
   function animate() {
@@ -183,10 +219,14 @@
         data[ index + 1 ] = value;
         data[ index + 2 ] = value;
         data[ index + 3 ] = 255;
+
+        index = ( height - row - 1 ) * width + i;
+        pointGeometry.vertices[ index ].z = message[i] * 64;
       }
 
       ctx.putImageData( imageData, 0, 0 );
       texture.needsUpdate = true;
+      pointGeometry.verticesNeedUpdate = true;
     }
   }) ();
 }) ();
