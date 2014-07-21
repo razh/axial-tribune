@@ -5,8 +5,10 @@
   var container;
 
   var scene, camera, controls, renderer;
-  var textureGeometry, textureMesh, textureMaterial;
-  var pointGeometry, pointMesh, pointMaterial;
+  var textureGeometry, textureMaterial, textureMesh;
+  var pointGeometry, pointMaterial, pointMesh;
+  var sphereGeometry, sphereMaterial, sphere;
+  var projector;
 
   var canvas, context;
   var texture;
@@ -131,6 +133,7 @@
     // Create point cloud.
     textureMesh = new THREE.PointCloud( textureGeometry, textureMaterial );
     textureMesh.frustumCulled = false;
+    textureMesh.visible = true;
     scene.add( textureMesh );
 
 
@@ -148,19 +151,34 @@
 
     pointGeometry = new THREE.Geometry();
 
-    var halfWidth  = 0.5 * width,
-        halfHeight = 0.5 * height;
-
     for ( i = 0, il = width * height; i <  il; i++ ) {
       vertex = new THREE.Vector3();
-      vertex.x = i % width + halfWidth;
-      vertex.y = Math.floor( i / width ) + halfHeight;
+      vertex.x = 2 * ( i % width );
+      vertex.y = 2 * Math.floor( i / width );
       pointGeometry.vertices.push( vertex );
     }
 
     pointMesh = new THREE.PointCloud( pointGeometry, pointMaterial );
     pointMesh.sortParticles = true;
+    pointMesh.visible = false;
     // scene.add( pointMesh );
+
+
+    // Projector.
+    projector = new THREE.Projector();
+
+    // Debug sphere.
+    sphereGeometry = new THREE.SphereGeometry( 2, 4, 4 );
+    sphereMaterial = new THREE.MeshBasicMaterial({
+      color: 0x88ff88,
+      opacity: 0.5,
+
+      wireframe: true,
+      transparent: true
+    });
+    sphere = new THREE.Mesh( sphereGeometry, sphereMaterial );
+    sphere.visible = pointMesh.visible;
+    scene.add( sphere );
   }
 
   function animate() {
@@ -175,6 +193,31 @@
   Promise.all( shaderPromises ).then(function() {
     init();
     animate();
+  });
+
+  window.addEventListener( 'mousemove', function( event ) {
+    if ( !pointMesh.visible ) {
+      return;
+    }
+
+    // Calculate intersection.
+    var vector = new THREE.Vector3(
+      ( event.pageX / window.innerWidth ) * 2 - 1,
+      -( event.pageY / window.innerHeight ) * 2 + 1,
+      0
+    );
+
+    projector.unprojectVector( vector, camera );
+
+    var raycaster = new THREE.Raycaster(
+      camera.position,
+      vector.sub( camera.position ).normalize()
+    );
+
+    var intersections = raycaster.intersectObject( pointMesh );
+    if ( intersections[0] ) {
+      sphere.position.copy( intersections[0].point );
+    }
   });
 
   window.addEventListener( 'resize', function() {
