@@ -84,6 +84,8 @@
     canvas.height = 128;
     document.body.appendChild( canvas );
     texture = new THREE.Texture( canvas );
+    texture.magFilter = THREE.NearestFilter;
+    texture.minFilter = THREE.NearestFilter;
 
     /**
      * Two update methods:
