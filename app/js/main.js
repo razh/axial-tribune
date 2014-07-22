@@ -229,6 +229,9 @@
 
 
   (function() {
+    // Display the length of the arraybuffer returned by the websocket.
+    var dataLengthEl = document.querySelector( '.js-data-length' );
+
     // Websocket.
     var host = window.document.location.host.replace( /:.*/, '' );
     var socket = new WebSocket( 'ws://' + host + ':8080' );
@@ -242,7 +245,7 @@
 
       var data = new Float32Array( event.data );
       draw( context, data, row++ );
-      console.log( data.length );
+      dataLengthEl.textContent = data.length;
     });
 
     function draw( ctx, message, row ) {

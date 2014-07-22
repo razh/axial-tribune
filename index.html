@@ -22,9 +22,23 @@
     canvas {
       z-index: 1;
     }
+
+    .output {
+      position: absolute;
+      z-index: 100;
+
+      right: 1em;
+      bottom: 1em;
+
+      color: #fff;
+      font-family: monospace;
+
+      opacity: 0.3;
+    }
   </style>
 </head>
 <body>
+  <div class="output js-data-length"></div>
 
   <script src="./bower_components/angular/angular.js"></script>
   <script src="./bower_components/threejs/build/three.js"></script>
