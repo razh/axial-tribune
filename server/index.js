@@ -6,6 +6,16 @@ var wss = new WebSocketServer({ port: 8080 });
 
 var simplex = new SimplexNoise();
 
+function log2( x ) {
+  return Math.log( x ) / Math.LN2;
+}
+
+var config = {};
+
+config.length = process.env.LENGTH || 128;
+config.octaves = Math.ceil( log2( config.length ) );
+config.period = 0.5 * config.length;
+
 wss.on( 'connection', function( socket ) {
   var intervalId;
 
@@ -39,10 +49,10 @@ wss.on( 'connection', function( socket ) {
   }
 
   function send( index ) {
-    var array = new Float32Array( 128 );
+    var array = new Float32Array( config.length );
     // For 128 pixels, 8 octaves is 0.5 pixel resolution (log2(128) is 8).
     for ( var i = 0, il = array.length; i < il; i++ ) {
-      array[i] = fbm( index, i, 8, 64 );
+      array[i] = fbm( index, i, config.octaves, config.period );
     }
 
     try {
