@@ -96,6 +96,7 @@
     canvas.width = width;
     canvas.height = height;
     document.body.appendChild( canvas );
+
     texture = new THREE.Texture( canvas );
     texture.magFilter = THREE.NearestFilter;
     texture.minFilter = THREE.NearestFilter;
@@ -108,9 +109,6 @@
     textureMaterial = new THREE.ShaderMaterial({
       uniforms: {
         texture: { type: 't', value: texture },
-        width: { type: 'f', value: width },
-        height: { type: 'f', value: height },
-
         scale: { type: 'v3', value: scale },
 
         pointColor: { type: 'v4', value: new THREE.Vector4( 0.5, 0.5, 0.5, 0.5 ) },
@@ -191,6 +189,8 @@
     sphere.visible = pointMesh.visible;
     scene.add( sphere );
 
+
+    // Add controls.
     var gui = new dat.GUI();
 
     gui.add( config, 'scaleX', 4, 1024 )
