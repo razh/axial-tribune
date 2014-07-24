@@ -1,4 +1,4 @@
-/*globals THREE, Promise, requestAnimationFrame*/
+/*globals THREE, Promise, requestAnimationFrame, dat*/
 (function() {
   'use strict';
 
@@ -53,6 +53,17 @@
     shaderPromises.push( promise );
   });
 
+  var config = {
+    scaleX: 256,
+    scaleY: 256,
+    scaleZ: 256
+  };
+
+  var scale = new THREE.Vector3(
+    config.scaleX,
+    config.scaleY,
+    config.scaleZ
+  );
 
   function init() {
     container = document.createElement( 'div' );
@@ -68,22 +79,22 @@
     camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 1e4 );
     controls = new THREE.OrbitControls( camera, renderer.domElement );
 
-    var scale = 256;
-    var halfScale = 0.5 * scale;
+    var size = 256;
+    var halfSize = 0.5 * size;
 
-    var width = 128,
-        height = 128;
+    var width = halfSize,
+        height = halfSize;
 
-    camera.position.set( halfScale, halfScale, scale );
-    controls.target.set( halfScale, halfScale, 0 );
+    camera.position.set( halfSize, halfSize, size );
+    controls.target.set( halfSize, halfSize, 0 );
     controls.update();
 
     scene.add( camera );
 
     canvas = document.createElement( 'canvas' );
     context = canvas.getContext( '2d' );
-    canvas.width = 128;
-    canvas.height = 128;
+    canvas.width = width;
+    canvas.height = height;
     document.body.appendChild( canvas );
     texture = new THREE.Texture( canvas );
     texture.magFilter = THREE.NearestFilter;
@@ -100,7 +111,7 @@
         width: { type: 'f', value: width },
         height: { type: 'f', value: height },
 
-        scale: { type: 'v3', value: new THREE.Vector3( scale, scale, scale ) },
+        scale: { type: 'v3', value: scale },
 
         pointColor: { type: 'v4', value: new THREE.Vector4( 0.5, 0.5, 0.5, 0.5 ) },
         pointSize: { type: 'f', value: 2 }
@@ -179,6 +190,23 @@
     sphere = new THREE.Mesh( sphereGeometry, sphereMaterial );
     sphere.visible = pointMesh.visible;
     scene.add( sphere );
+
+    var gui = new dat.GUI();
+
+    gui.add( config, 'scaleX', 4, 1024 )
+      .onChange(function( value ) {
+        scale.x = value;
+      });
+
+    gui.add( config, 'scaleY', 4, 1024 )
+      .onChange(function( value ) {
+        scale.y = value;
+      });
+
+    gui.add( config, 'scaleZ', 4, 1024 )
+      .onChange(function( value ) {
+        scale.z = value;
+      });
   }
 
   function animate() {
