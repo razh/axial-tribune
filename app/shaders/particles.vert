@@ -1,7 +1,7 @@
 uniform sampler2D texture;
 
 uniform float pointSize;
-uniform float scale;
+uniform vec3 scale;
 
 void main() {
   gl_PointSize = pointSize;

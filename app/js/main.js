@@ -100,7 +100,7 @@
         width: { type: 'f', value: width },
         height: { type: 'f', value: height },
 
-        scale: { type: 'f', value: scale },
+        scale: { type: 'v3', value: new THREE.Vector3( scale, scale, scale ) },
 
         pointColor: { type: 'v4', value: new THREE.Vector4( 0.5, 0.5, 0.5, 0.5 ) },
         pointSize: { type: 'f', value: 2 }
@@ -196,7 +196,7 @@
   });
 
   window.addEventListener( 'mousemove', function( event ) {
-    if ( !pointMesh.visible ) {
+    if ( !pointMesh || !pointMesh.visible ) {
       return;
     }
 
