@@ -53,19 +53,23 @@
     shaderPromises.push( promise );
   });
 
-  var config = {
-    scaleX: 256,
-    scaleY: 256,
-    scaleZ: 256
-  };
+  var config = {};
+  var scale = new THREE.Vector3();
 
-  var scale = new THREE.Vector3(
-    config.scaleX,
-    config.scaleY,
-    config.scaleZ
-  );
+  function init( size ) {
+    size = size || 256;
 
-  function init() {
+    var halfSize = 0.5 * size;
+
+    var width = halfSize,
+        height = halfSize;
+
+    config.scaleX = size;
+    config.scaleY = size;
+    config.scaleZ = size;
+    scale.set( size, size, size );
+
+    // Initialize WebGL.
     container = document.createElement( 'div' );
     container.classList.add( 'webgl' );
     document.body.appendChild( container );
@@ -79,18 +83,13 @@
     camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 1, 1e4 );
     controls = new THREE.OrbitControls( camera, renderer.domElement );
 
-    var size = 256;
-    var halfSize = 0.5 * size;
-
-    var width = halfSize,
-        height = halfSize;
-
     camera.position.set( halfSize, halfSize, size );
     controls.target.set( halfSize, halfSize, 0 );
     controls.update();
 
     scene.add( camera );
 
+    // Initialize canvas texture.
     canvas = document.createElement( 'canvas' );
     context = canvas.getContext( '2d' );
     canvas.width = width;
@@ -218,11 +217,63 @@
     renderer.render( scene, camera );
   }
 
-  Promise.all( shaderPromises ).then(function() {
-    init();
-    animate();
-  });
+  // Render to canvas.
+  function draw( ctx, message, row ) {
+    var width  = ctx.canvas.width,
+        height = ctx.canvas.height;
 
+    // Loop back.
+    row %= height;
+
+    var imageData = ctx.getImageData( 0, 0, width, height ),
+        data = imageData.data;
+
+    var index, value;
+    for ( var i = 0; i < width; i++ ) {
+      index = 4 * ( row * width + i );
+      value = 0.5 * ( message[i] + 1 ) * 255;
+
+      data[ index     ] = value;
+      data[ index + 1 ] = value;
+      data[ index + 2 ] = value;
+      data[ index + 3 ] = 255;
+
+      index = ( height - row - 1 ) * width + i;
+      pointGeometry.vertices[ index ].z = message[i] * 64;
+    }
+
+    ctx.putImageData( imageData, 0, 0 );
+    texture.needsUpdate = true;
+    pointGeometry.verticesNeedUpdate = true;
+  }
+
+  function connect() {
+    // Display the length of the arraybuffer returned by the websocket.
+    var dataLengthEl = document.querySelector( '.js-data-length' );
+
+    // Connect with WebSocket.
+    var host = window.document.location.host.replace( /:.*/, '' );
+    var socket = new WebSocket( 'ws://' + host + ':8080' );
+    socket.binaryType = 'arraybuffer';
+
+    var row = 0;
+    socket.addEventListener( 'message', function( event ) {
+      var data = new Float32Array( event.data );
+
+      // Initialize and start animating.
+      if ( !context ) {
+        init( 2 * data.length );
+        requestAnimationFrame( animate );
+      }
+
+      draw( context, data, row++ );
+      dataLengthEl.textContent = data.length;
+    });
+  }
+
+  Promise.all( shaderPromises ).then( connect );
+
+  // Find ray intersection with pointMesh on mousemove.
   window.addEventListener( 'mousemove', function( event ) {
     if ( !pointMesh || !pointMesh.visible ) {
       return;
@@ -255,54 +306,4 @@
     renderer.setSize( window.innerWidth, window.innerHeight );
   });
 
-
-  (function() {
-    // Display the length of the arraybuffer returned by the websocket.
-    var dataLengthEl = document.querySelector( '.js-data-length' );
-
-    // Websocket.
-    var host = window.document.location.host.replace( /:.*/, '' );
-    var socket = new WebSocket( 'ws://' + host + ':8080' );
-    socket.binaryType = 'arraybuffer';
-
-    var row = 0;
-    socket.addEventListener( 'message', function( event ) {
-      if ( !context ) {
-        return;
-      }
-
-      var data = new Float32Array( event.data );
-      draw( context, data, row++ );
-      dataLengthEl.textContent = data.length;
-    });
-
-    function draw( ctx, message, row ) {
-      var width  = ctx.canvas.width,
-          height = ctx.canvas.height;
-
-      // Loop back.
-      row %= height;
-
-      var imageData = ctx.getImageData( 0, 0, width, height ),
-          data = imageData.data;
-
-      var index, value;
-      for ( var i = 0; i < width; i++ ) {
-        index = 4 * ( row * width + i );
-        value = 0.5 * ( message[i] + 1 ) * 255;
-
-        data[ index     ] = value;
-        data[ index + 1 ] = value;
-        data[ index + 2 ] = value;
-        data[ index + 3 ] = 255;
-
-        index = ( height - row - 1 ) * width + i;
-        pointGeometry.vertices[ index ].z = message[i] * 64;
-      }
-
-      ctx.putImageData( imageData, 0, 0 );
-      texture.needsUpdate = true;
-      pointGeometry.verticesNeedUpdate = true;
-    }
-  }) ();
 }) ();
