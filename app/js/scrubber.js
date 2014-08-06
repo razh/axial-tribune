@@ -1,5 +1,5 @@
-/*exported scrubber*/
-function scrubber( el ) {
+/*exported createScrubber*/
+function createScrubber( el ) {
   'use strict';
 
   /**
