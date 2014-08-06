@@ -12,12 +12,24 @@ function log2( x ) {
 
 var config = {};
 
-config.length = process.env.LENGTH || 128;
-config.octaves = Math.ceil( log2( config.length ) );
-config.period = 0.5 * config.length;
+function setLength( length ) {
+  config.length = length || 128;
+  config.octaves = Math.ceil( log2( config.length ) );
+  config.period = 0.5 * config.length;
+}
+
+setLength( process.env.LENGTH );
 
 wss.on( 'connection', function( socket ) {
   var intervalId;
+
+  socket.on( 'message', function( message ) {
+    message = JSON.parse( message );
+    var length = parseInt( message.length, 10 );
+    if ( length ) {
+      setLength( length );
+    }
+  });
 
   /**
    * - Octave determines the granularity of the fbm.

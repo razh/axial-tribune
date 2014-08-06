@@ -252,7 +252,7 @@
     var dataLengthEl = document.querySelector( '.js-data-length' );
 
     // Connect with WebSocket.
-    var host = window.document.location.host.replace( /:.*/, '' );
+    var host = window.location.hostname;
     var socket = new WebSocket( 'ws://' + host + ':8080' );
     socket.binaryType = 'arraybuffer';
 
