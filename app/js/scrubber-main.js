@@ -2,6 +2,10 @@
 (function() {
   'use strict';
 
+  function clamp( value, min, max ) {
+    return Math.min( Math.max( value, min ), max );
+  }
+
   var config = {
     length: 64
   };
@@ -27,6 +31,11 @@
   canvas.scrubber.width  = 64;
   canvas.scrubber.height = 256;
   document.body.appendChild( canvas.scrubber );
+
+  // backingHeight * columns - scrubberHeight.
+  var scrubberMaxY = canvas.backingStore.height *
+    Math.floor( canvas.backingStore.width / canvas.scrubber.width ) -
+    canvas.scrubber.height;
 
   function connect() {
     // Connect with WebSocket.
@@ -157,5 +166,18 @@
       );
     }
   }
+
+  var scrollY = 0;
+
+  function draw() {
+    drawScrubber( context.scrubber, canvas.backingStore, scrollY );
+    requestAnimationFrame( draw );
+  }
+
+  draw();
+
+  window.addEventListener( 'wheel', function( event ) {
+    scrollY = clamp( scrollY + event.deltaY, 0, scrubberMaxY );
+  });
 
 }) ();

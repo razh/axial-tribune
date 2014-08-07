@@ -108,6 +108,8 @@ function createScrubber( el ) {
 
   var self = {};
 
+  self.state = state;
+
   self.on = function on( eventType, listener ) {
     if ( !callbacks[ eventType ] ) {
       callbacks[ eventType ] = [];
