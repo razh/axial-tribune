@@ -177,7 +177,13 @@
   draw();
 
   window.addEventListener( 'wheel', function( event ) {
+    var prevY = scrollY;
     scrollY = clamp( scrollY + event.deltaY, 0, scrubberMaxY );
+
+    // Prevent window scrolling if scrubber has scrolled.
+    if ( prevY !== scrollY ) {
+      event.preventDefault();
+    }
   });
 
 }) ();
