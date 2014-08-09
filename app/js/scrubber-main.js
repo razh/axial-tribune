@@ -32,6 +32,10 @@
   canvas.scrubber.height = 256;
   document.body.appendChild( canvas.scrubber );
 
+  canvas.output.width  = 64;
+  canvas.output.height = 64;
+  document.body.appendChild( canvas.output );
+
   // backingHeight * columns - scrubberHeight.
   var scrubberMaxY = canvas.backingStore.height *
     Math.floor( canvas.backingStore.width / canvas.scrubber.width ) -
@@ -167,10 +171,35 @@
     }
   }
 
+  function drawOutput( ctx, scrubberCanvas, row ) {
+    var width  = ctx.canvas.width,
+        height = ctx.canvas.height;
+
+    var scrubberWidth  = scrubberCanvas.width,
+        scrubberHeight = scrubberCanvas.height;
+
+    if ( width > scrubberWidth || height > scrubberHeight ) {
+      throw new Error( 'Output canvas is larger than scrubber.' );
+    }
+
+    if ( row + height > scrubberHeight ) {
+      row = scrubberHeight - height;
+    }
+
+    ctx.clearRect( 0, 0, width, height );
+
+    ctx.drawImage(
+      scrubberCanvas,
+      0, row, width, height,
+      0,   0, width, height
+    );
+  }
+
   var scrollY = 0;
 
   function draw() {
     drawScrubber( context.scrubber, canvas.backingStore, scrollY );
+    drawOutput( context.output, canvas.scrubber, 0 );
     requestAnimationFrame( draw );
   }
 
