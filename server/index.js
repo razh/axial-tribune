@@ -60,6 +60,31 @@ wss.on( 'connection', function( socket ) {
     return sum;
   }
 
+  /**
+   * Fractional Brownian motion with domain warping.
+   *
+   * From Inigo Quilez's article:
+   *
+   *   http://www.iquilezles.org/www/articles/warp/warp.htm
+   */
+  function pattern( px, py, octaves, period, lacunarity, gain ) {
+    // fbm( p ).
+    var qx = fbm( px,       py,       octaves, period, lacunarity, gain ),
+        qy = fbm( px + 5.2, py + 1.3, octaves, period, lacunarity, gain );
+
+    // Temporary vec2.
+    var tx = px + period * qx,
+        ty = py + period * qy;
+
+    // fbm( p + fbm( p ) ).
+    var rx = fbm( tx + 1.7, ty + 9.2, octaves, period, lacunarity, gain ),
+        ry = fbm( tx + 8.3, ty + 2.8, octaves, period, lacunarity, gain );
+
+    // fbm( p + fbm( p + fbm( p ) ) ).
+    return fbm( px + period * rx, py + period * ry, octaves, period, lacunarity, gain );
+  }
+
+
   function send( index ) {
     var array = new Float32Array( config.length );
     // For 128 pixels, 8 octaves is 0.5 pixel resolution (log2(128) is 8).
